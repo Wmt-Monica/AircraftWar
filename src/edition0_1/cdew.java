@@ -1,4 +1,4 @@
 package edition0_1;
 
-public class giv {
+public class cdew {
 }
