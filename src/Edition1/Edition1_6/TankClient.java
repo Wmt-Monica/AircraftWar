@@ -6,14 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 版本1.5
+ * 版本1.6
  * 功能：
- *      画出一辆敌人的坦克
+ *      将敌人坦克击毙
  * 步骤：
- *      1.加入区分敌我的量good
- *      2.根据敌我的不同设置不用的颜色
- *      3.更新Tank的构造函数，加入good
- *      4.TankClient中new出敌人的坦克并画出
+ *      1.Bullet中加入hitTank(Tank)方法，返回布尔类型
+ *      2.碰撞检测的辅助类Rectangle
+ *      3.为Tank和Bullet都加入getRect()方法
+ *      4.当击中敌人的坦克时，坦克被打死，子弹也死亡
+ *      5.增加控制Tank死亡的量bLive
+ *      6.如果死去就不画了
  */
 public class TankClient extends JFrame {
 
@@ -27,7 +29,7 @@ public class TankClient extends JFrame {
     private static boolean ME_GOOD = true;  //创建一个属于自己的坦克的good值
 
     Tank tank = new Tank(TANK_X,TANK_Y,ME_GOOD);  // 创建一个坦克类对象实例
-    Tank enemyTank = new Tank(TANK_X+50,TANK_Y+50,false);  //创建一个敌方坦克实例对象
+    Tank enemyTank = new Tank(TANK_X,TANK_Y,false);  //创建一个敌方坦克实例对象
 
     Bullet bullet = null;
     List<Bullet> bulletList = new ArrayList<>();  //创建子弹容器类对象
@@ -56,13 +58,16 @@ public class TankClient extends JFrame {
         tank.draw(g);  // 给坦克画笔自己调用方法画出自己
 
         g.setColor(Color.BLUE);  //将画笔设置为蓝色画出敌方坦克
-        enemyTank.draw(g);  //给敌方坦克画笔调用自己的draw()方法画出自己
+        if (enemyTank.getBLive() == true){
+            enemyTank.draw(g);  //给敌方坦克画笔调用自己的draw()方法画出自己
+        }
 
         g.setColor(Color.CYAN);  // 将画笔设置为水绿色绘画出子弹
         for (int i = 0; i < bulletList.size(); i++){
             bullet = bulletList.get(i);  // 容器下标是从0开始
             // 如果用户按了ctrl键，就将给子弹对象画笔画出自己
             if (bullet != null){  // 给子弹画笔调用自身类的draw()方法画出自己
+                bullet.hitTank(enemyTank);
                 if (bullet.bulletLive()){
                     bullet.draw(g);
                 }else {

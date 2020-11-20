@@ -8,14 +8,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 版本1.5
+ * 版本1.6
  * 功能：
- *      画出一辆敌人的坦克
+ *      将敌人坦克击毙
  * 步骤：
- *      1.加入区分敌我的量good
- *      2.根据敌我的不同设置不用的颜色
- *      3.更新Tank的构造函数，加入good
- *      4.TankClient中new出敌人的坦克并画出
+ *      1.Bullet中加入hitTank(Tank)方法，返回布尔类型
+ *      2.碰撞检测的辅助类Rectangle
+ *      3.为Tank和Bullet都加入getRect()方法
+ *      4.当击中敌人的坦克时，坦克被打死，子弹也死亡
+ *      5.增加控制Tank死亡的量bLive
+ *      6.如果死去就不画了
  */
 public class Tank extends JFrame {
     private static int TANK_SIZE = 30;  // 实心圆坦克的直径长
@@ -24,6 +26,7 @@ public class Tank extends JFrame {
     private List<Bullet> bulletList = new ArrayList<>();  //创建子弹容器类对象
     Bullet bullet = null;
     private boolean good;
+    private boolean bLive = true;
 
     // 1.添加记录按键状态的布尔值
     private boolean U = false;  // 上
@@ -54,6 +57,17 @@ public class Tank extends JFrame {
 
     public int getY(){
         return y;
+    }
+
+    public int getTANK_SIZE(){
+        return TANK_SIZE;
+    }
+
+    public boolean getBLive(){
+        return bLive;
+    }
+    public void death(){
+        bLive = false;
     }
 
     public List<Bullet> getBulletList(){
