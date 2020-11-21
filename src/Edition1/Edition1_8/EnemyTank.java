@@ -85,7 +85,7 @@ public class EnemyTank implements Runnable {
             while (tankIterator.hasNext()){
                 Tank tank = tankIterator.next();
 
-                // 为了避免线程中获取tank对象中对该tank对象进行修改，为tank该坦克加上锁
+                // 为了避免线程中获取tank对象中对该tank对象进行修改进行加锁的操作
                 synchronized (tank){
                     if (tank.getBLive()){
                         tank.draw(g);
