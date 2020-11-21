@@ -51,6 +51,7 @@ public class TankClient extends JFrame {
         bulletList = tank.getBulletList();  // 获取坦克的炮弹容器
         // 将字符串画在游戏窗口上，前面时要绘画的字符，后面两个参数是，字符串的坐标X，和坐标Y
         g.drawString("存活子弹个数："+bulletList.size(),10,50);
+        g.drawString("存活敌方坦克个数："+enemyTanks.enemyTankNum,10,80);
 
         g.setColor(Color.PINK);  // 将画笔设置为粉色画出坦克
         tank.draw(g);  // 给坦克画笔自己调用方法画出自己
@@ -130,7 +131,7 @@ public class TankClient extends JFrame {
 
                 // 为了更好的看到效果，让线程每重画一次就休息500ms
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

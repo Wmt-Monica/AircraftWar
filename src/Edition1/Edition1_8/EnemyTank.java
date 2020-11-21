@@ -84,11 +84,15 @@ public class EnemyTank implements Runnable {
             Iterator<Tank> tankIterator = tankList.iterator();
             while (tankIterator.hasNext()){
                 Tank tank = tankIterator.next();
-                if (tank.getBLive()){
-                    tank.draw(g);
-                }else {
-                    tankIterator.remove();  //如果该敌方坦克已经死亡就移除敌方坦克容器中
-                    enemyTankNum--;
+
+                // 为了避免线程中获取tank对象中对该tank对象进行修改，为tank该坦克加上锁
+                synchronized (tank){
+                    if (tank.getBLive()){
+                        tank.draw(g);
+                    }else {
+                        tankIterator.remove();  //如果该敌方坦克已经死亡就移除敌方坦克容器中
+                        enemyTankNum--;
+                    }
                 }
                 i++;
             }
