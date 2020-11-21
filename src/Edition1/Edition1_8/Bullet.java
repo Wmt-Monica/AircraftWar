@@ -107,8 +107,8 @@ public class Bullet extends JFrame {
     //创建一个是否打中敌方坦克的方法
     public boolean hitTank(EnemyTank enemyTank) {
         for (Tank enemyTanks : enemyTank.tankList) {
-            if (x >= enemyTanks.getX() && x <= enemyTanks.getX() + enemyTanks.getTANK_SIZE() &&
-                    y >= enemyTanks.getY() && y <= enemyTanks.getY() + enemyTanks.getTANK_SIZE()) {
+            if (x >= enemyTanks.getX() - enemyTanks.getTANK_SIZE() && x <= enemyTanks.getX() + enemyTanks.getTANK_SIZE() &&
+                    y >= enemyTanks.getY() - enemyTanks.getTANK_SIZE() && y <= enemyTanks.getY() + enemyTanks.getTANK_SIZE()) {
                 death();
                 enemyTanks.death();
                 return true;

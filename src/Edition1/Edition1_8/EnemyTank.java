@@ -35,7 +35,7 @@ public class EnemyTank implements Runnable {
 
         //新增敌方坦克来个缓冲
         try {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
