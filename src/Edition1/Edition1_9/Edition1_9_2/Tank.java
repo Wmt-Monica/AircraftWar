@@ -12,6 +12,7 @@ import java.util.Random;
  * 版本1.9.2
  * 功能：
  *      让敌方坦克自由动起来
+ *      让坦克可以相隔一定时间内发射炮弹
  * 步骤：
  *      随机产生方向数组中的方向对应的方向常量
  */
@@ -21,6 +22,9 @@ public class Tank extends JFrame {
     private int MOVE_LENGTH = 5;  // 坦克每次移动的最小距离
     private List<Bullet> bulletList = new ArrayList<>();  //创建子弹容器类对象
     private Bullet bullet = null;
+    static int time = 0;  // 设置time来控制敌方坦克转换方向的频率
+    static int fireTime = 0;  // 设置fireTime来空着敌方坦克发射炮弹的次数
+    private final int ENEMY_TANK_MOVE_LENGTH = 50;  // 敌方坦克的最小移动距离
 
     private boolean good;
     private boolean bLive = true;
@@ -122,6 +126,7 @@ public class Tank extends JFrame {
                 new KeyListener().tankMove();
             }
         }
+
     }
 
 
@@ -282,14 +287,68 @@ public class Tank extends JFrame {
             }
         }
 
-        // 创建坦克是否越界的方法
-        public boolean crossScreen(int nowX,int nowY){
-            if (nowX < 10 || nowX > new TankClient().getScreenWidth()-40 || nowY < 30 || nowY > new TankClient().getScreenHeight()-40){
-                return false;
-            }
-            return true;
-        }
 
     }
+
+    //创造根据敌方坦克炮筒方向移动的方法
+    public void tankMove(Tank.DirectionENUM direction){
+        switch (direction){
+            case U:
+                if (crossScreen(x,y - ENEMY_TANK_MOVE_LENGTH)){
+                    y -= ENEMY_TANK_MOVE_LENGTH;
+                }
+                break;
+            case UR:
+                if (crossScreen(x + ENEMY_TANK_MOVE_LENGTH,y - ENEMY_TANK_MOVE_LENGTH)){
+                    x +=  ENEMY_TANK_MOVE_LENGTH;
+                    y -= ENEMY_TANK_MOVE_LENGTH;
+                }
+                break;
+            case R:
+                if (crossScreen(x + ENEMY_TANK_MOVE_LENGTH,y)){
+                    x += ENEMY_TANK_MOVE_LENGTH;
+                }
+                break;
+            case RD:
+                if (crossScreen(x + ENEMY_TANK_MOVE_LENGTH, y + ENEMY_TANK_MOVE_LENGTH)){
+                    x += ENEMY_TANK_MOVE_LENGTH;
+                    y += ENEMY_TANK_MOVE_LENGTH;
+                }
+                break;
+            case D:
+                if (crossScreen(x,y + ENEMY_TANK_MOVE_LENGTH)){
+                    y += ENEMY_TANK_MOVE_LENGTH;
+                }
+                break;
+            case LD:
+                if (crossScreen(x - ENEMY_TANK_MOVE_LENGTH,y + ENEMY_TANK_MOVE_LENGTH)){
+                    x -=  ENEMY_TANK_MOVE_LENGTH;
+                    y += ENEMY_TANK_MOVE_LENGTH;
+                }
+                break;
+            case L:
+                if (crossScreen(x - ENEMY_TANK_MOVE_LENGTH,y)){
+                    x -= ENEMY_TANK_MOVE_LENGTH;
+                }
+                break;
+            case LU:
+                if (crossScreen(x - ENEMY_TANK_MOVE_LENGTH,y - ENEMY_TANK_MOVE_LENGTH)){
+                    x -= ENEMY_TANK_MOVE_LENGTH;
+                    y -= ENEMY_TANK_MOVE_LENGTH;
+                }
+                break;
+            case STOP:
+                break;
+        }
+    }
+
+    // 创建坦克是否越界的方法
+    public boolean crossScreen(int nowX,int nowY){
+        if (nowX < 10 || nowX > new TankClient().getScreenWidth()-40 || nowY < 30 || nowY > new TankClient().getScreenHeight()-40){
+            return false;
+        }
+        return true;
+    }
+
 
 }

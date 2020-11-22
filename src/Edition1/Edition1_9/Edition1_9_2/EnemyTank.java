@@ -8,19 +8,19 @@ import java.util.List;
  * 版本1.9.2
  * 功能：
  *      让敌方坦克自由动起来
+ *      让坦克可以相隔一定时间内发射炮弹
  * 步骤：
  *      随机产生方向数组中的方向对应的方向常量
  */
 
 // 敌方坦克容器类对象
 public class EnemyTank implements Runnable {
-    int enemyTankNum = 0;
+    static int enemyTankNum = 0;
     List<Tank> tankList = Collections.synchronizedList(new ArrayList<>());  // 创建一个存放敌方坦克的容器
     private List<Bullet> bulletList = new ArrayList<>();  //创建子弹容器类对象
     Tank myTank = null;  // 创建主战坦克对象
     private static int SCREEN_WIDTH = 800;  // 游戏窗口的宽度
     private static int SCREEN_HEIGHT = 600;  // 游戏窗口的高度
-    private final int ENEMY_TANK_MOVE_LENGTH = 5;
 
     // 构造器
     public EnemyTank(Tank tank){
@@ -49,7 +49,9 @@ public class EnemyTank implements Runnable {
                  x = new Random().nextInt(SCREEN_WIDTH - 40 - 10 + 1)+10;
                  y = new Random().nextInt(SCREEN_HEIGHT - 40 - 30 + 1)+30;
             }
-            tankList.add(new Tank(x,y,false));
+            synchronized (tankList){
+                tankList.add(new Tank(x,y,false));
+            }
             enemyTankNum++;
         }
 
@@ -135,14 +137,24 @@ public class EnemyTank implements Runnable {
         @Override
         public void run() {
             synchronized (tankList){
+                if (enemyTankNum < 10){
+                    creatEnemyTank();
+                }
+                int i = 0;
                 for (Tank tank : tankList){
+                    i ++;
                     if (tank.getBLive()){
                         enemyTankAction(tank);
-                        Bullet bullet = fire(tank);
+                        new fire(tank,g).start();
                         Color bulletColor = g.getColor();
                         g.setColor(Color.BLUE);
-                        tank.draw(g);
-                        bullet.draw(g);
+                        synchronized (tank){
+                            if (i < 10){
+                                tank.draw(g);
+                            }else {
+                                tankList.remove(tank);
+                            }
+                        }
                         g.setColor(bulletColor);
                     }
                 }
@@ -171,7 +183,15 @@ public class EnemyTank implements Runnable {
     }
 
     // 创造敌方坦克转换方向的方法
-    public void enemyTankAction(Tank enemyTank){
+    public Tank.DirectionENUM enemyTankAction(Tank enemyTank){
+        if (enemyTank.time < 100){
+            enemyTank.fireTime = 0;
+            enemyTank.time ++;
+            return enemyTank.bulletDirection;  // 返回原来的方向
+        }else {
+            enemyTank.time = 0;
+            enemyTank.fireTime = 1;
+        }
 
         synchronized (this){
             // 创建移动方向数组
@@ -181,70 +201,9 @@ public class EnemyTank implements Runnable {
                     Tank.DirectionENUM.L, Tank.DirectionENUM.LU, Tank.DirectionENUM.STOP};
 
             enemyTank.bulletDirection= enemyDirections[new Random().nextInt(9)];  // 随机产生[0,9)之间的方向数组对应的下标的数字
-
-            // 根据随机产生的方向常量作为参数传入tankMove()方法中
-            int[] location = tankMove(enemyTank.getX(),enemyTank.getY(),enemyTank.bulletDirection);
-            enemyTank.setX(location[0]);
-            enemyTank.setY(location[1]);
-
+            enemyTank.tankMove(enemyTank.bulletDirection);
         }
-
-    }
-
-    //创造根据敌方坦克炮筒方向移动的方法
-    public int[] tankMove(int x, int y, Tank.DirectionENUM direction){
-        int[] location = new int[2];
-        switch (direction){
-            case U:
-                if (crossScreen(x,y - ENEMY_TANK_MOVE_LENGTH)){
-                    y -= ENEMY_TANK_MOVE_LENGTH;
-                }
-                break;
-            case UR:
-                if (crossScreen(x + ENEMY_TANK_MOVE_LENGTH,y - ENEMY_TANK_MOVE_LENGTH)){
-                    x +=  ENEMY_TANK_MOVE_LENGTH;
-                    y -= ENEMY_TANK_MOVE_LENGTH;
-                }
-                break;
-            case R:
-                if (crossScreen(x + ENEMY_TANK_MOVE_LENGTH,y)){
-                    x += ENEMY_TANK_MOVE_LENGTH;
-                }
-                break;
-            case RD:
-                if (crossScreen(x + ENEMY_TANK_MOVE_LENGTH, y + ENEMY_TANK_MOVE_LENGTH)){
-                    x += ENEMY_TANK_MOVE_LENGTH;
-                    y += ENEMY_TANK_MOVE_LENGTH;
-                }
-                break;
-            case D:
-                if (crossScreen(x,y + ENEMY_TANK_MOVE_LENGTH)){
-                    y += ENEMY_TANK_MOVE_LENGTH;
-                }
-                break;
-            case LD:
-                if (crossScreen(x - ENEMY_TANK_MOVE_LENGTH,y + ENEMY_TANK_MOVE_LENGTH)){
-                    x -=  ENEMY_TANK_MOVE_LENGTH;
-                    y += ENEMY_TANK_MOVE_LENGTH;
-                }
-                break;
-            case L:
-                if (crossScreen(x - ENEMY_TANK_MOVE_LENGTH,y)){
-                    x -= ENEMY_TANK_MOVE_LENGTH;
-                }
-                break;
-            case LU:
-                if (crossScreen(x - ENEMY_TANK_MOVE_LENGTH,y - ENEMY_TANK_MOVE_LENGTH)){
-                    x -= ENEMY_TANK_MOVE_LENGTH;
-                    y -= ENEMY_TANK_MOVE_LENGTH;
-                }
-                break;
-            case STOP:
-                break;
-        }
-        location[0] = x;
-        location[1] = y;
-        return location;
+        return enemyTank.bulletDirection;
     }
 
     // 创建坦克是否越界的方法
@@ -256,13 +215,29 @@ public class EnemyTank implements Runnable {
     }
 
     // 创建发射子弹的方法
-    public Bullet fire(Tank tank){
-        Bullet bullet = new Bullet(
-                tank.getX()+(tank.getTankSize()-new Bullet().getBULLET_SIZE())/2,
-                tank.getY()+(tank.getTankSize()-new Bullet().getBULLET_SIZE())/2,
-                tank.bulletDirection,false); // 根据创建的坦克类，给该坦克类创建子弹类
-        bulletList.add(bullet);
-        return bullet;
+    class fire extends Thread{
+        Tank tank = null;
+        Graphics g;
+        public fire(Tank tank,Graphics g){
+            this.tank = tank;
+            this.g = g;
+        }
+        @Override
+        public void run() {
+            if (tank.fireTime == 1){
+                Bullet bullet = enemyTankFire();
+                bullet.draw(g);
+            }
+        }
+
+        public Bullet enemyTankFire(){
+            Bullet bullet = new Bullet(
+                    tank.getX()+(tank.getTankSize()-new Bullet().getBULLET_SIZE())/2,
+                    tank.getY()+(tank.getTankSize()-new Bullet().getBULLET_SIZE())/2,
+                    tank.bulletDirection,false); // 根据创建的坦克类，给该坦克类创建子弹类
+            bulletList.add(bullet);
+            return bullet;
+        }
     }
 
 

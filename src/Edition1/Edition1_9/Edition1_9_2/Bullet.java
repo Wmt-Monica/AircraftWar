@@ -8,6 +8,7 @@ import java.awt.event.KeyAdapter;
  * 版本1.9.2
  * 功能：
  *      让敌方坦克自由动起来
+ *      让坦克可以相隔一定时间内发射炮弹
  * 步骤：
  *      随机产生方向数组中的方向对应的方向常量
  */
@@ -58,7 +59,14 @@ public class Bullet extends JFrame {
     }
 
     public void draw(Graphics g) {
+        Color startColor = g.getColor();
+        if (good){
+            g.setColor(Color.CYAN);
+        }else {
+            g.setColor(Color.GREEN);
+        }
         g.fillOval(x, y, BULLET_SIZE, BULLET_SIZE);
+        g.setColor(startColor);
         new KeyListener().bulletMove();
     }
 
