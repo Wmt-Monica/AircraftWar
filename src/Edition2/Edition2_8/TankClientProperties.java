@@ -25,7 +25,7 @@ public class TankClientProperties {
 
     static {
         try {
-            properties.load(TankClientProperties.class.getClassLoader().getResourceAsStream("config/tankClient.properties"));
+            properties.load(TankClientProperties.class.getClassLoader().getResourceAsStream("Edition2/Edition2_8/config/tankClient.properties"));
         } catch (IOException e) {
             e.printStackTrace();
         }
